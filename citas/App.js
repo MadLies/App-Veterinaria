@@ -9,20 +9,27 @@ import {
   View,
   Button,
   Pressable,
+  FlatList,
   Modal,
 } from 'react-native';
 
 import Formulario from './src/components/Formulario';
-
+import Paciente from './src/components/Paciente';
 
 
 
 const App = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [pacientes, setPacientes] = useState([]);
+  const [paciente, setPaciente] = useState({});
 
-
-
+  const pacienteEdit = id =>{
+    const paciente = pacientes.filter(paciente => paciente.id === id);
+    setPaciente(paciente[0]);
+    console.log(paciente[0]);
+  }
+ 
   return (
     <View style={styles.vista}>
       <Text style={styles.titulo}>Administrador de Citas {' '}
@@ -30,13 +37,38 @@ const App = () => {
       </Text>
       <Text style={styles.subtitulo}>Crea y administra las citas de tu mascota</Text>
       <Pressable style={styles.btnNuevaCita}
-        onPress={ ()=>setModalVisible(true)}
+        onPress={ ()=>setModalVisible(!modalVisible)}
       >
         <Text style={styles.btnTextoNuevaCita}>Nueva Cita</Text>
       </Pressable>
+
+      {pacientes.length === 0 ? 
+      <Text style={styles.notPet}>No Hay Pacientes Aún</Text> : 
+        <FlatList
+          style={styles.list}
+          data={pacientes}
+          keyExtractor={(item) => item.id}
+          renderItem={({item}) => {
+            return (
+              <Paciente
+              item={item}
+              setModalVisible={setModalVisible}
+              pacienteEdit={pacienteEdit}
+              />
+            )
+          }
+        }
+        />
+      }
+
+
       <Formulario
         modalVisible={modalVisible}
-        
+        setModalVisible={setModalVisible}
+        setPacientes={setPacientes}
+        pacientes={pacientes}
+        paciente={paciente}
+
       />
     </View>
   );
@@ -63,7 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#000",
     fontWeight: 'bold',
-    marginTop: 30,
+    marginTop: 20,
   },
 
 
@@ -82,9 +114,21 @@ btnTextoNuevaCita:{
   fontWeight: '900',
   textTransform: 'uppercase',
 
-}
+},
 
+notPet: {
+  textAlign: 'center',
+  fontSize: 25,
+  color: "#000",
+  fontWeight: '700',
+  marginTop: 40,
+},
 
+list: {
+ marginVertical: 20,  
+ marginHorizontal: 30,
+
+},
 
 });
 

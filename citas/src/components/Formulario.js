@@ -3,8 +3,8 @@ import {Modal, Text,StyleSheet , View, TextInput ,
  ScrollView,Alert, Pressable} from  'react-native'
 import DatePicker from 'react-native-date-picker'
 
-const Formulario = ({modalVisible, setModalVisible ,pacientes ,
-  setPacientes, paciente: pacienteObj}) => {
+const Formulario = ({ modalVisible, closeModal ,pacientes ,
+  setPacientes, paciente: pacienteObj, setPaciente:setPacienteApp}) => {
     const [paciente, setPaciente] = useState('');
     const [id , setId] = useState('');
     const [propietario, setPropietario] = useState('');
@@ -22,9 +22,8 @@ const Formulario = ({modalVisible, setModalVisible ,pacientes ,
       setTelefono(pacienteObj.telefono);
       setFecha(pacienteObj.fecha);
       setSintomas(pacienteObj.sintomas);
-      console.log("ola");
     }
-    }, [])
+    }, [ pacienteObj])
 
     const handleCita = () => { 
       if([paciente, propietario, email, telefono, fecha, sintomas].includes('')){
@@ -35,8 +34,9 @@ const Formulario = ({modalVisible, setModalVisible ,pacientes ,
            );
         return    
       }
-      const newP = {
-        id: Date.now(),
+
+       const newP = {
+      
         paciente,
         propietario,
         email,
@@ -44,10 +44,23 @@ const Formulario = ({modalVisible, setModalVisible ,pacientes ,
         fecha,
         sintomas
       }
-      setPacientes([...pacientes,newP]);
-      console.log(pacientes);
-      setModalVisible(!modalVisible);
 
+      if(id){
+
+        newP.id = id;
+        const actP = pacientes.map(pacientenState => 
+        pacientenState.id === id ? newP : pacientenState)
+        setPacientes(actP);
+        setPacienteApp({});
+      }
+      else{
+
+          newP.id = Date.now()
+          setPacientes([...pacientes,newP]);
+      }
+      
+      closeModal();
+      setId('');
       setPaciente('');
       setPropietario('');
       setEmail('');
@@ -66,13 +79,25 @@ const Formulario = ({modalVisible, setModalVisible ,pacientes ,
 
       <View style={styles.vista}>
         <ScrollView>
-          <Text style={styles.titulo}> Nueva {''}
+          <Text style={styles.titulo}> 
+            {pacienteObj.id ? 'Editar ' : 'Nueva '}{''}
               <Text style={styles.tituloBold}>Cita</Text>
           </Text>
 
           <Pressable 
           style={styles.btnClose}
-          onLongPress={()=> setModalVisible(!modalVisible)}
+          onLongPress={()=> {
+            closeModal();
+            setPacienteApp({})
+            setId('');
+            setPaciente('');
+            setPropietario('');
+            setEmail('');
+            setTelefono('');
+            setFecha(new Date());
+            setSintomas('');
+
+          }}
           >
             <Text style={styles.btnTextClose}>Cancelar</Text> 
           </Pressable>
@@ -160,7 +185,8 @@ const Formulario = ({modalVisible, setModalVisible ,pacientes ,
               style={styles.btnSubmit}
               onPress={handleCita}
           >
-              <Text style={styles.btnSubmitText}>Agregar Paciente</Text> 
+              <Text style={styles.btnSubmitText}>
+                {!pacienteObj.id ? 'Agregar' : 'Editar'} Paciente</Text> 
           </Pressable>
         </ScrollView>
       </View>
